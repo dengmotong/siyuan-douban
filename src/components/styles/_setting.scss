@@ -1,6 +1,9 @@
 .settings {
-    width: fit-content;
+    width: 100%;
     padding: 20px;
+    max-height: 65vh;
+    overflow-y: auto;
+    box-sizing: border-box;
 
     h3 {
         color: var(--b3-theme-primary);

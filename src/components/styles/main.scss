@@ -48,6 +48,9 @@
         align-items: center;
         display: flex;
         flex-direction: column;
+        max-height: 60vh;
+        overflow-y: auto;
+        box-sizing: border-box;
         // 应用适配的主题色
         color: var(--text-color);
 

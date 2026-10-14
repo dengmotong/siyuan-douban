@@ -1,7 +1,9 @@
 <script lang="ts">
     import type { I18N } from "siyuan";
+    import { fetchSyncPost } from "siyuan";
     import { createEventDispatcher } from "svelte";
     import { getImage } from "@/utils/core/getImg";
+    import CustomSelect from "@/libs/components/CustomSelect.svelte";
 
     export let i18n: I18N;
 
@@ -21,16 +23,59 @@
     }>();
 
     let coverData = "";
+    let coverUploadError = "";
 
-    $: if (bookInfo?.cover) {
+    $: if (bookInfo?.cover && !bookInfo.cover.startsWith("assets/")) {
+        coverData = "";
         (async () => {
             try {
-                coverData = await getImage(bookInfo.cover);
+                const data = await getImage(bookInfo.cover, bookInfo.bookPageUrl || "https://book.douban.com/");
+                if (data) {
+                    coverData = data;
+                }
             } catch (error) {
                 console.error("Cover loading failed:", error);
-                coverData = "";
             }
         })();
+    }
+
+    async function handleUploadCover() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            coverUploadError = "上传中...";
+            try {
+                const ext = file.name.split(".").pop() || "jpg";
+                const cleanName = (bookInfo?.title || "cover").replace(/[^\w\u4e00-\u9fa5]/g, "_");
+                const timestamp = Date.now();
+                const fileName = `${cleanName}_manual_${timestamp}.${ext}`;
+                const savePath = `/data/assets/covers/${fileName}`;
+                const refPath = `assets/covers/${fileName}`;
+
+                // 创建新 File 对象，确保与 path 中的文件名一致
+                const renamedFile = new File([file.slice(0, file.size, file.type)], fileName, { type: file.type });
+
+                const formData = new FormData();
+                formData.append("path", savePath);
+                formData.append("file", renamedFile);
+                const response = await fetchSyncPost("/api/file/putFile", formData);
+
+                if (response.code === 0) {
+                    bookInfo.cover = refPath;
+                    coverData = URL.createObjectURL(file);
+                    coverUploadError = "✅ 封面上传成功";
+                } else {
+                    coverUploadError = `❌ 上传失败: ${response.msg || "未知错误"}`;
+                }
+            } catch (error) {
+                coverUploadError = `❌ 上传失败: ${error.message}`;
+            }
+        };
+        input.click();
     }
 </script>
 
@@ -62,12 +107,26 @@
                 <div class="cover-column" style="center">
                     {#if bookInfo.cover}
                         <img
-                            src={coverData}
+                            src={coverData || bookInfo.cover}
                             alt={i18n.bookCover}
                             class="book-cover"
-                            style={!coverData ? "display: none;" : ""}
+                            style={!coverData && !bookInfo.cover ? "display: none;" : ""}
                         />
                     {/if}
+                    <div class="cover-upload-area">
+                        <button
+                            class="b3-button b3-button--outline"
+                            on:click={handleUploadCover}
+                            style="font-size: 12px; margin-top: 6px; padding: 4px 10px;"
+                        >
+                            📁 {i18n.uploadCover || "上传封面"}
+                        </button>
+                        {#if coverUploadError}
+                            <div style="font-size: 11px; margin-top: 4px; color: #666;">
+                                {coverUploadError}
+                            </div>
+                        {/if}
+                    </div>
                 </div>
                 <div class="info-column">
                     <div class="form-row">
@@ -222,31 +281,28 @@
                     <div>
                         <label>
                             {i18n.bookMyRating}
-                            <select bind:value={myRatingIndex}>
-                                {#each customRatings as rating, index}
-                                    <option value={index}>{rating}</option>
-                                {/each}
-                            </select>
+                            <CustomSelect
+                                items={customRatings}
+                                bind:selectedIndex={myRatingIndex}
+                            />
                         </label>
                     </div>
                     <div>
                         <label>
                             {i18n.bookCategory}
-                            <select bind:value={bookCategoryIndex}>
-                                {#each customCategories as category, index}
-                                    <option value={index}>{category}</option>
-                                {/each}
-                            </select>
+                            <CustomSelect
+                                items={customCategories}
+                                bind:selectedIndex={bookCategoryIndex}
+                            />
                         </label>
                     </div>
                     <div>
                         <label>
                             {i18n.bookReadingStatus}
-                            <select bind:value={readingStatusIndex}>
-                                {#each customReadingStatuses as status, index}
-                                    <option value={index}>{status}</option>
-                                {/each}
-                            </select>
+                            <CustomSelect
+                                items={customReadingStatuses}
+                                bind:selectedIndex={readingStatusIndex}
+                            />
                         </label>
                     </div>
                     <div>

@@ -90,9 +90,24 @@ export async function addUseBookIDsToDatabase(plugin: any, avID: string, bookDet
         avID: avID,
     }).then((res) => databaseKeys = res.data);
 
-    // 下载封面
-    const coverBase64Data = await getImage(bookDetail.cover); // 下载封面图片的 Base64 数据
-    bookDetail.cover = await downloadCover(coverBase64Data, bookDetail.title); // 下载封面图片并保存到本地
+    // 下载封面（仅在封面为远程URL时尝试下载）
+    if (bookDetail.cover && bookDetail.cover.startsWith("http")) {
+        const referrer = bookDetail.bookPageUrl || "https://book.douban.com/";
+        try {
+            const coverBase64Data = await getImage(bookDetail.cover, referrer);
+            if (coverBase64Data) {
+                bookDetail.cover = await downloadCover(coverBase64Data, bookDetail.title);
+            } else {
+                bookDetail.cover = "";
+                console.warn("封面自动下载失败，跳过封面");
+            }
+        } catch (error) {
+            bookDetail.cover = "";
+            console.warn("封面自动下载异常，跳过封面:", error);
+        }
+    } else {
+        bookDetail.cover = "";
+    }
 
     // 构建书籍数据
     const blocksValues = buildBlocksValues(databaseKeys, bookDetail);

@@ -8,6 +8,9 @@ export async function loadAVData(avID: string, fullData: any, plugin: any) {
     try {
         // 判断数据库中是否含有该书籍（以 ISBN 为依据）
         let originalDatabase = await fetchSyncPost("/api/av/getAttributeView", { "id": avID, });
+        if (!originalDatabase?.data?.av) {
+            throw new Error("未找到数据库属性视图，请确保已创建读书笔记数据库");
+        }
         let originalDatabasekeyValues = originalDatabase.data.av.keyValues;
 
         // 检查数据库是否为空或不存在 ISBN 列
@@ -36,12 +39,15 @@ export async function loadAVData(avID: string, fullData: any, plugin: any) {
 
                     // 重新获取数据库信息
                     originalDatabase = await fetchSyncPost("/api/av/getAttributeView", { "id": avID, });
+                    if (!originalDatabase?.data?.av) {
+                        throw new Error("重新获取数据库信息失败");
+                    }
                     originalDatabasekeyValues = originalDatabase.data.av.keyValues;
                 }
             }
 
             // 查找 ISBN 列
-            const updatedIsbnKey = originalDatabasekeyValues.find((kv: any) => kv.key?.name === "ISBN");
+            const updatedIsbnKey = originalDatabasekeyValues?.find((kv: any) => kv.key?.name === "ISBN");
 
             if (updatedIsbnKey && updatedIsbnKey.values && Array.isArray(updatedIsbnKey.values)) {
                 // 检查是否已存在相同 ISBN 的书籍
@@ -62,6 +68,13 @@ export async function loadAVData(avID: string, fullData: any, plugin: any) {
         let databaseKeys: any;
         // 获取数据库详细列配置
         await fetchSyncPost("/api/av/getAttributeViewKeysByAvID", { avID: avID, }).then((res) => databaseKeys = res.data);
+
+        // 清理废弃的"单选"列
+        const danxuan = databaseKeys.find((k: any) => k.name === "单选");
+        if (danxuan) {
+            await fetchSyncPost("/api/av/removeAttributeViewKey", { avID, keyIDs: [danxuan.id] });
+            await fetchSyncPost("/api/av/getAttributeViewKeysByAvID", { avID }).then((res) => databaseKeys = res.data);
+        }
 
         // 检查数据库主键是否为书名
         if (databaseKeys[0].name !== "书名") { await changeMainKeyName(avID); }
@@ -91,9 +104,22 @@ export async function loadAVData(avID: string, fullData: any, plugin: any) {
             avID: avID,
         }).then((res) => databaseKeys = res.data);
 
-        // 下载封面
-        const coverBase64Data = await getImage(fullData.cover);
-        fullData.cover = await downloadCover(coverBase64Data, fullData.title);
+        // 下载封面（仅在封面为远程URL时尝试下载）
+        if (fullData.cover && fullData.cover.startsWith("http")) {
+            const referrer = fullData.bookPageUrl || "https://book.douban.com/";
+            try {
+                const coverBase64Data = await getImage(fullData.cover, referrer);
+                if (coverBase64Data) {
+                    fullData.cover = await downloadCover(coverBase64Data, fullData.title);
+                } else {
+                    fullData.cover = "";
+                    console.warn("封面自动下载失败，可在添加前通过「上传封面」按钮手动设置");
+                }
+            } catch (error) {
+                fullData.cover = "";
+                console.warn("封面自动下载异常，可在添加前通过「上传封面」按钮手动设置:", error);
+            }
+        }
 
         // 构建书籍数据并添加到数据库
         const blocksValues = buildBlocksValues(databaseKeys, fullData);
@@ -106,10 +132,13 @@ export async function loadAVData(avID: string, fullData: any, plugin: any) {
 
         // 获取数据库信息并匹配新添加的书籍行的 blockID
         const updatedDatabase = await fetchSyncPost("/api/av/getAttributeView", { "id": avID, });
+        if (!updatedDatabase?.data?.av?.keyValues) {
+            throw new Error("获取更新后的数据库信息失败");
+        }
         const updatedDatabaseKeyValues = updatedDatabase.data.av.keyValues;
 
         // 查找 书名列
-        const bookNameKeyNew = updatedDatabaseKeyValues.find((kv: any) => kv.key.name === "书名");
+        const bookNameKeyNew = updatedDatabaseKeyValues.find((kv: any) => kv.key?.name === "书名");
         let blockID = null;
 
         let matchingValue = null;

@@ -1,30 +1,70 @@
 import { fetchSyncPost } from "siyuan";
 import { formatTime } from './formatOp';
 
-export async function getImage(url: string) {
-    try {
-        const response = await fetchSyncPost("/api/network/forwardProxy", {
-            url: url,
-            method: "GET",
-            timeout: 7000,
-            contentType: "image/jpeg",
-            headers: [
-                {
-                    name: "User-Agent",
-                    value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
-                },
-            ],
-            payload: {},
-            payloadEncoding: "text",
-            responseEncoding: "base64",
-        });
-        const contentType =
-            response.data.headers["Content-Type"]?.[0] || "image/jpeg";
+/**
+ * 通过 forwardProxy 直连豆瓣图片 CDN
+ */
+async function fetchImageViaProxy(url: string, referrer: string, timeout: number = 10000): Promise<string> {
+    const response = await fetchSyncPost("/api/network/forwardProxy", {
+        url: url,
+        method: "GET",
+        timeout: timeout,
+        contentType: "image/jpeg",
+        headers: [
+            { name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0" },
+            { name: "sec-ch-ua", value: '"Chromium";v="148", "Microsoft Edge";v="148", "Not/A)Brand";v="99"' },
+            { name: "sec-ch-ua-mobile", value: "?0" },
+            { name: "sec-ch-ua-platform", value: '"Windows"' },
+            { name: "Referer", value: referrer },
+        ],
+        payload: {},
+        payloadEncoding: "text",
+        responseEncoding: "base64",
+    });
+    if (response?.data?.body && response.data.status === 200) {
+        const contentType = response.data.headers?.["Content-Type"]?.[0] || response.data.contentType || "image/jpeg";
         return `data:${contentType};base64,${response.data.body}`;
-    } catch (error) {
-        console.error("图片获取失败:", error);
+    }
+    return "";
+}
+
+/**
+ * 尝试从豆瓣图片CDN（img1~img9）下载封面
+ * @param url 封面图片URL
+ * @param referrer 豆瓣书籍页面URL（用作Referer头）
+ */
+export async function getImage(url: string, referrer: string = "https://book.douban.com/"): Promise<string> {
+    if (!url) {
+        console.warn("封面 URL 为空，跳过下载");
         return "";
     }
+
+    // 生成多个CDN主机地址（img1~img9）
+    const imgHosts = ['img9', 'img1', 'img2', 'img3'];
+    const urlsToTry: string[] = [url];
+    const match = url.match(/https:\/\/img(\d)\.doubanio\.com/);
+    if (match) {
+        const currentHost = parseInt(match[1]);
+        for (const host of imgHosts) {
+            const hostNum = parseInt(host.replace('img', ''));
+            if (hostNum !== currentHost) {
+                urlsToTry.push(url.replace(`img${currentHost}.doubanio.com`, `${host}.doubanio.com`));
+            }
+        }
+    }
+
+    // 依次尝试各CDN主机
+    for (const tryUrl of urlsToTry) {
+        try {
+            const result = await fetchImageViaProxy(tryUrl, referrer, 8000);
+            if (result) return result;
+        } catch (e) {
+            // 忽略错误，尝试下一个
+        }
+    }
+
+    console.warn("所有豆瓣图片CDN主机均无法下载封面");
+    return "";
 }
 
 export async function downloadCover(base64Data: string, title: string,) {

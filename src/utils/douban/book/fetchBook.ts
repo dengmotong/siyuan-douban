@@ -17,6 +17,7 @@ interface BookInfo {
     cover?: string;
     description?: string;
     authorBio?: string;
+    bookPageUrl?: string;
 }
 
 const extractInfo = (doc: Document, label: string): string | null => {
@@ -43,7 +44,7 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
 
             title: doc.querySelector("h1")?.textContent?.trim() || "未知书名",
 
-            subtitle: document.evaluate(
+            subtitle: doc.evaluate(
                 '//div[@id="info"]/span[text()="副标题:"]/following-sibling::text()[1]',
                 doc,
                 null,
@@ -51,7 +52,7 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
                 null
             ).singleNodeValue?.nodeValue?.trim() || extractInfo(doc, "副标题"),
 
-            originalTitle: document.evaluate('//div[@id="info"]/span[contains(text(),"原作名")]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.nodeValue?.trim() || extractInfo(doc, "原作名"),
+            originalTitle: doc.evaluate('//div[@id="info"]/span[contains(text(),"原作名")]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.nodeValue?.trim() || extractInfo(doc, "原作名"),
 
             authors: Array.from(doc.querySelectorAll("span.pl"))
                 .filter((span) => span.textContent?.trim() === "作者")
@@ -67,7 +68,7 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
                         .map(a => a.textContent?.trim())
                 ).filter(Boolean) as string[],
 
-            publisher: document.evaluate('//div[@id="info"]/span[text()="出版社:"]/following-sibling::a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent?.trim() || extractInfo(doc, "出版社"),
+            publisher: doc.evaluate('//div[@id="info"]/span[text()="出版社:"]/following-sibling::a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent?.trim() || extractInfo(doc, "出版社"),
 
             isbn: extractInfo(doc, "ISBN")?.replace(/[^0-9X]/g, "") || "",
 
@@ -77,9 +78,10 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
 
             price: extractInfo(doc, "定价")?.match(/[\d.]+/)?.[0],
 
-            cover: doc.querySelector("#mainpic img")?.getAttribute("src")?.replace(/^http:/, "https:"),
+            cover: doc.querySelector('meta[property="og:image"]')?.getAttribute("content")?.replace(/^http:/, "https:")
+                || doc.querySelector("#mainpic img")?.getAttribute("src")?.replace(/^http:/, "https:"),
 
-            series: document.evaluate(
+            series: doc.evaluate(
                 '//div[@id="info"]/span[contains(text(),"丛书")]/following-sibling::a',
                 doc,
                 null,
@@ -87,7 +89,7 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
                 null
             ).singleNodeValue?.textContent?.trim() || extractInfo(doc, "丛书"),
 
-            binding: document.evaluate(
+            binding: doc.evaluate(
                 '//div[@id="info"]/span[text()="装帧:"]/following-sibling::text()[1]',
                 doc,
                 null,
@@ -95,7 +97,7 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
                 null
             ).singleNodeValue?.nodeValue?.trim() || extractInfo(doc, "装帧"),
 
-            producer: document.evaluate('//div[@id="info"]/span[text()="出品方:"]/following-sibling::a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent?.trim() || extractInfo(doc, "出品方"),
+            producer: doc.evaluate('//div[@id="info"]/span[text()="出品方:"]/following-sibling::a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent?.trim() || extractInfo(doc, "出品方"),
 
             rating: doc.querySelector(".rating_num")?.textContent?.trim(),
 
@@ -159,7 +161,9 @@ export async function fetchDoubanBook(html: string): Promise<BookInfo> {
                 }
                 
                 return null;
-            })()
+            })(),
+
+            bookPageUrl: doc.querySelector('meta[property="og:url"]')?.getAttribute("content") || "",
         };
     } catch (error) {
         // 增强错误信息处理

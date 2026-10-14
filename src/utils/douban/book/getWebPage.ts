@@ -1,6 +1,10 @@
 import { forwardProxy } from "@/api";
 
-export async function fetchBookHtml(isbn: string) {
+/**
+ * 通过 ISBN 或豆瓣 subject ID 获取书籍详情页 HTML
+ * @param id ISBN 或豆瓣 subject ID
+ */
+export async function fetchBookHtml(id: string) {
     const SEARCH_ENGINES = [
         "https://www.google.com",
         "https://www.bing.com",
@@ -12,9 +16,15 @@ export async function fetchBookHtml(isbn: string) {
         "https://startpage.com",
     ];
 
+    // 判断是 ISBN 还是 subject ID
+    const isISBN = /^(97(8|9))?\d{9}(\d|X)$/.test(id);
+    const url = isISBN
+        ? `https://book.douban.com/isbn/${id}`
+        : `https://book.douban.com/subject/${id}/`;
+
     try {
         const response = await forwardProxy(
-            `https://douban.com/isbn/${isbn}`,
+            url,
             "GET",
             {},
             [
@@ -34,6 +44,7 @@ export async function fetchBookHtml(isbn: string) {
         }
         throw new Error("请求失败");
     } catch (error) {
-        throw new Error(`通过ISBN号获取豆瓣书籍失败: ${error.message}`);
+        const prefix = isISBN ? "通过ISBN号获取豆瓣书籍失败" : "通过豆瓣ID获取书籍失败";
+        throw new Error(`${prefix}: ${error.message}`);
     }
 }
