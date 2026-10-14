@@ -6,11 +6,14 @@
     import "./styles/main.scss";
     import { loadAVData } from "../utils/bookHandling";
     import { loadAVMovieData } from "../utils/movieHandling";
+    import { loadAVTvData } from "../utils/tvHandling";
     import SearchBookDialog from "./common/searchBookDialog.svelte";
     import SearchMovieDialog from "./common/searchMovieDialog.svelte";
+    import SearchTvDialog from "./common/searchTvDialog.svelte";
     import TemplateEditorDialog from "./common/templateEditorDialog.svelte";
     import BookSearchTab from "./tabs/BookSearchTab.svelte";
     import MovieSearchTab from "./tabs/MovieSearchTab.svelte";
+    import TvSearchTab from "./tabs/TvSearchTab.svelte";
     import UserSettingsTab from "./tabs/UserSettingsTab.svelte";
     import WereadTab from "./tabs/WereadTab.svelte";
     import AboutTab from "./tabs/AboutTab.svelte";
@@ -162,9 +165,84 @@
     let originalMovieTemplate = "";
     let tmdbApiKey = "";
 
+    // === 电视剧状态 ===
+    let tvInputVales = "";
+    let tvInfo: any = null;
+    let tvStatusMessage = "";
+    let tvDatabassID = "";
+    let tvAvID = "";
+    let tvNoteTemplate = `# 📺 {{剧名}}-{{原名}}
+
+![]({{封面}})
+
+## 基本信息
+| 🏷️ 属性       | 📝 内容                  |
+|-------------|-------------------------|
+| 原名         | {{原名}}                 |
+| 导演         | {{导演}}                 |
+| 编剧         | {{编剧}}                 |
+| 主演         | {{主演}}                 |
+| 类型         | {{类型}}                 |
+| 制片国家/地区  | {{制片国家/地区}}          |
+| 语言         | {{语言}}                 |
+| 首播日期     | {{首播日期}}             |
+| 季数         | {{季数}}                 |
+| 集数         | {{集数}}                 |
+| 单集片长     | {{单集片长}}             |
+| 电视台       | {{电视台}}               |
+| IMDb编号     | \`{{IMDb编号}}\`           |
+
+---
+
+## 评分信息
+⭐ **{{评分}}**（基于 {{评分人数}} 人评价）
+🔗 链接：[查看详情]({{链接}})
+
+---
+
+## 我的追剧记录
+**追剧状态**：{{追剧状态}}
+**我的评分**：{{我的评分}}
+**开始观看**：{{开始日期}}
+**看完日期**：{{看完日期}}
+
+---
+
+## 剧情简介
+{{剧情简介}}
+
+---
+
+## 追剧笔记
+### ✍️ 追剧心得
+（在此记录你的观剧体会）
+
+### 🖼️ 剧集截图
+| # | 截图 | 说明 |
+|---|------|------|
+| 1 | _在此粘贴剧集截图_ | _写下对截图画面的说明或感受_ |
+| 2 | | |
+| 3 | | |
+| … | | |`;
+    let tvRatings = ['⭐⭐⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐', '⭐⭐', '⭐'];
+    let tvCategories = ['剧情', '喜剧', '爱情', '悬疑', '犯罪', '科幻', '奇幻', '古装', '历史', '动画', '纪录片', '综艺', '其他'];
+    let tvStatuses = ['想看', '在看', '已看', '弃剧'];
+    let tempTvRatings = tvRatings.join(", ");
+    let tempTvCategories = tvCategories.join(", ");
+    let tempTvStatuses = tvStatuses.join(", ");
+    let tvRatingIndex = 0;
+    let tvCategoryIndex = 0;
+    let tvStatusIndex = 0;
+    let showTvSearchDialog = false;
+    let tvSearchKeyword = "";
+    let tvDatabaseStatusMessage = "";
+    let showTvTemplateEditor = false;
+    let originalTvTemplate = "";
+
     const tabs = [
         "🔍 " + i18n.topTabname1,
         "🎬 " + i18n.topTabname5,
+        "📺 " + i18n.topTabname6,
         "⚙️ " + i18n.topTabname2,
         "📗 " + i18n.topTabname3,
         "ℹ️ " + i18n.topTabname4,
@@ -272,6 +350,49 @@
         }
     }
 
+    async function fetchTvData() {
+        try {
+            if (!tvInputVales) {
+                throw new Error(i18n.Error4);
+            }
+            tvSearchKeyword = encodeURIComponent(tvInputVales);
+            showTvSearchDialog = true;
+        } catch (error) {
+            tvStatusMessage = error.message || i18n.statusMessage3;
+        }
+    }
+
+    async function handleAddTv() {
+        if (!tvInfo) return;
+
+        const fullData = {
+            ...tvInfo,
+            databaseBlockId: tvDatabassID,
+            myRating: tvRatings[tvRatingIndex],
+            tvCategory: tvCategories[tvCategoryIndex],
+            watchingStatus: tvStatuses[tvStatusIndex],
+            startDate: tvInfo.startDate || "",
+            finishDate: tvInfo.finishDate || "",
+            addNotes: tvInfo.addNotes,
+            noteTemplate: tvNoteTemplate,
+        };
+
+        try {
+            const result = await loadAVTvData(tvAvID, fullData, plugin);
+            if (result.code === 1) {
+                showMessage(`${i18n.showMessage1} ${result.msg}`, 5000);
+            } else if (result.code === 0) {
+                showMessage(`✅《${tvInfo.title}》已添加`, 3000);
+                await fetchPost("/api/ui/reloadAttributeView", { id: tvAvID });
+                tvInfo = null;
+                tvInputVales = "";
+                tvStatusMessage = "";
+            }
+        } catch (error) {
+            showMessage(`${i18n.showMessage1} ${error.message}`, 5000);
+        }
+    }
+
     async function handleAddBook() {
         if (!bookInfo) return;
 
@@ -320,6 +441,9 @@
         if (tempMovieRatings) movieRatings = parseCSV(tempMovieRatings);
         if (tempMovieCategories) movieCategories = parseCSV(tempMovieCategories);
         if (tempMovieStatuses) movieStatuses = parseCSV(tempMovieStatuses);
+        if (tempTvRatings) tvRatings = parseCSV(tempTvRatings);
+        if (tempTvCategories) tvCategories = parseCSV(tempTvCategories);
+        if (tempTvStatuses) tvStatuses = parseCSV(tempTvStatuses);
 
         try {
             await plugin.saveData("settings.json", {
@@ -336,12 +460,41 @@
                 movieCategories: movieCategories,
                 movieStatuses: movieStatuses,
                 tmdbApiKey: tmdbApiKey,
+                tvDatabaseID: tvDatabassID,
+                tvNoteTemplate: tvNoteTemplate,
+                tvRatings: tvRatings,
+                tvCategories: tvCategories,
+                tvStatuses: tvStatuses,
             });
             showMessage(i18n.showMessage5, 3000);
             await validateDatabaseID();
             if (movieDatabassID) await validateMovieDatabaseID();
+            if (tvDatabassID) await validateTvDatabaseID();
         } catch (error) {
             showMessage(`${i18n.showMessage6} ${error.message}`, 5000);
+        }
+    }
+
+    async function validateTvDatabaseID() {
+        if (!tvDatabassID) return;
+        try {
+            tvDatabaseStatusMessage = i18n.databaseStatusMessage1;
+            const query = `SELECT * FROM blocks WHERE id = "${tvDatabassID}"`;
+            const result = await sql(query);
+            if (result.length === 0 || !result[0]?.markdown) {
+                throw new Error(i18n.Error1);
+            }
+            const avDivMatch = result[0].markdown.match(/data-av-id="([^"]+)"/);
+            if (!avDivMatch) {
+                throw new Error(i18n.Error2);
+            }
+            tvAvID = avDivMatch[1];
+            tvDatabaseStatusMessage = i18n.databaseStatusMessage2;
+        } catch (error) {
+            showMessage(`${i18n.showMessage4} ${error.message}`, 5000);
+            tvDatabaseStatusMessage = `${i18n.showMessage4} ${error.message}`;
+            tvDatabassID = "";
+            tvAvID = "";
         }
     }
 
@@ -424,6 +577,8 @@
                 movieDatabassID = savedSettings.movieDatabaseID || "";
                 movieNoteTemplate = savedSettings.movieNoteTemplate || "";
                 tmdbApiKey = savedSettings.tmdbApiKey || "";
+                tvDatabassID = savedSettings.tvDatabaseID || "";
+                tvNoteTemplate = savedSettings.tvNoteTemplate || "";
 
                 tempRatings = customRatings.join(", ");
                 tempCategories = customCategories.join(", ");
@@ -446,11 +601,31 @@
                 tempMovieCategories = movieCategories.join(", ");
                 tempMovieStatuses = movieStatuses.join(", ");
 
+                if (savedSettings.tvRatings?.length) {
+                    const filtered = savedSettings.tvRatings.filter(Boolean);
+                    if (filtered.length) tvRatings = filtered;
+                }
+                if (savedSettings.tvCategories?.length) {
+                    const filtered = savedSettings.tvCategories.filter(Boolean);
+                    if (filtered.length) tvCategories = filtered;
+                }
+                if (savedSettings.tvStatuses?.length) {
+                    const filtered = savedSettings.tvStatuses.filter(Boolean);
+                    if (filtered.length) tvStatuses = filtered;
+                }
+
+                tempTvRatings = tvRatings.join(", ");
+                tempTvCategories = tvCategories.join(", ");
+                tempTvStatuses = tvStatuses.join(", ");
+
                 if (bookDatabassID) {
                     await validateDatabaseID();
                 }
                 if (movieDatabassID) {
                     await validateMovieDatabaseID();
+                }
+                if (tvDatabassID) {
+                    await validateTvDatabaseID();
                 }
             }
         });
@@ -508,8 +683,25 @@
                 on:addMovie={handleAddMovie}
             />
 
-            <!-- 第三个标签页 - 用户设置 -->
+            <!-- 第三个标签页 - 电视剧查询 -->
         {:else if activeTab === tabs[2]}
+            <TvSearchTab
+                bind:inputVales={tvInputVales}
+                bind:tvInfo
+                bind:i18n
+                statusMessage={tvStatusMessage}
+                {tvRatings}
+                {tvCategories}
+                {tvStatuses}
+                bind:myRatingIndex={tvRatingIndex}
+                bind:categoryIndex={tvCategoryIndex}
+                bind:statusIndex={tvStatusIndex}
+                on:fetchTvData={fetchTvData}
+                on:addTv={handleAddTv}
+            />
+
+            <!-- 第四个标签页 - 用户设置 -->
+        {:else if activeTab === tabs[3]}
             <UserSettingsTab
                 bind:bookDatabassID
                 bind:i18n
@@ -525,6 +717,11 @@
                 bind:tempMovieStatuses
                 {movieDatabaseStatusMessage}
                 bind:tmdbApiKey
+                bind:tvDatabassID
+                bind:tempTvRatings
+                bind:tempTvCategories
+                bind:tempTvStatuses
+                {tvDatabaseStatusMessage}
                 on:validate={validateDatabaseID}
                 on:save={handleSaveSettings}
                 on:openTemplate={() => {
@@ -535,12 +732,16 @@
                     originalMovieTemplate = movieNoteTemplate;
                     showMovieTemplateEditor = true;
                 }}
+                on:openTvTemplate={() => {
+                    originalTvTemplate = tvNoteTemplate;
+                    showTvTemplateEditor = true;
+                }}
             />
-            <!-- 第四个标签页 - 微信读书设置-->
-        {:else if activeTab === tabs[3]}
+            <!-- 第五个标签页 - 微信读书设置-->
+        {:else if activeTab === tabs[4]}
             <WereadTab bind:plugin bind:i18n />
 
-            <!-- 第五个标签页 - 关于插件 -->
+            <!-- 第六个标签页 - 关于插件 -->
         {:else}
             <AboutTab bind:i18n />
         {/if}
@@ -589,6 +790,28 @@
     }}
 />
 
+<SearchTvDialog
+    bind:plugin
+    bind:showSearchDialog={showTvSearchDialog}
+    bind:searchKeyword={tvSearchKeyword}
+    {tmdbApiKey}
+    on:close={() => (showTvSearchDialog = false)}
+    on:select={async ({ detail }) => {
+        try {
+            tvStatusMessage = "成功获取电视剧信息";
+            const selectedTv = detail;
+            selectedTv.addNotes = true;
+            selectedTv.doubanUrl = selectedTv.tmdbUrl || selectedTv.doubanUrl;
+            tvInfo = selectedTv;
+            tvInputVales = selectedTv.title;
+            showMessage(`✅ 成功获取《${selectedTv.title}》`, 3000);
+        } catch (error) {
+            showMessage(`❌ 解析失败: ${error.message}`, 5000);
+            console.error("Tv analysis failed:", error);
+        }
+    }}
+/>
+
 <TemplateEditorDialog
     bind:showTemplateEditor
     bind:noteTemplate
@@ -629,6 +852,29 @@
             originalMovieTemplate = movieNoteTemplate;
             showMovieTemplateEditor = false;
             showMessage("✅ 电影笔记模板保存成功", 3000);
+        } catch (error) {
+            showMessage(`❌ 模板保存失败: ${error.message}`, 5000);
+        }
+    }}
+/>
+
+<TemplateEditorDialog
+    bind:showTemplateEditor={showTvTemplateEditor}
+    bind:noteTemplate={tvNoteTemplate}
+    bind:plugin
+    on:close={() => {
+        tvNoteTemplate = originalTvTemplate;
+        showTvTemplateEditor = false;
+    }}
+    on:save={async () => {
+        try {
+            const currentSettings =
+                (await plugin.loadData("settings.json")) || {};
+            currentSettings.tvNoteTemplate = tvNoteTemplate;
+            await plugin.saveData("settings.json", currentSettings);
+            originalTvTemplate = tvNoteTemplate;
+            showTvTemplateEditor = false;
+            showMessage("✅ 电视剧笔记模板保存成功", 3000);
         } catch (error) {
             showMessage(`❌ 模板保存失败: ${error.message}`, 5000);
         }

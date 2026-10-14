@@ -32,7 +32,7 @@
             const keyword = decodeURIComponent(searchKeyword);
             searchResults = await searchTMDBMovies(keyword, tmdbApiKey, plugin);
             if (searchResults.length === 0) {
-                errorMessage = plugin.i18n?.searchNoResults || "未找到相关电影";
+                errorMessage = plugin.i18n?.searchNoResultsMovie || "未找到相关电影";
             }
         } catch (error) {
             if (retryOnFailure) {
@@ -40,7 +40,7 @@
                     const keyword = decodeURIComponent(searchKeyword);
                     searchResults = await searchTMDBMovies(keyword, tmdbApiKey, plugin);
                     if (searchResults.length === 0) {
-                        errorMessage = plugin.i18n?.searchNoResults || "未找到相关电影";
+                        errorMessage = plugin.i18n?.searchNoResultsMovie || "未找到相关电影";
                     }
                 } catch (retryError) {
                     errorMessage = `${retryError.message}`;

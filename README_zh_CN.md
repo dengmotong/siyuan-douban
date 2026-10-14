@@ -1,164 +1,242 @@
-<div class="sy__outline" style="max-width: 800px; margin: 0 auto;">
-    <div style="text-align: center; padding: 2em; background: linear-gradient(135deg, #2d8cf0, #1e6bff); border-radius: 12px;">
-        <h1 style="color: white; margin: 0; font-size: 2.2em;">📚 读书笔记插件</h1>
-        <div style="color: rgba(255,255,255,0.9); margin-top: 0.5em;">让书籍管理更智能、更高效</div>
-    </div>
-    <div style="margin-top: 1.5em; padding: 1.5em; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h2 style="color: #2d8cf0; margin: 0 0 1em;">🚀 核心功能</h2>
-        <ul style="margin: 0; padding-left: 1.2em;">
-            <li style="margin: 0.5em 0; padding: 8px 12px; background: #f8fafc; border-radius: 6px;">🔍 ISBN 或关键词（书名）快速查询</li>
-            <li style="margin: 0.5em 0; padding: 8px 12px; background: #f8fafc; border-radius: 6px;">📥 自动填充书籍元数据到数据库</li>
-            <li style="margin: 0.5em 0; padding: 8px 12px; background: #f8fafc; border-radius: 6px;">📝 基于模板生成读书笔记</li>
-            <li style="margin: 0.5em 0; padding: 8px 12px; background: #f8fafc; border-radius: 6px;">📗 自动同步微信读书笔记（v2.0.0支持）</li>
-        </ul>
-        <div style="margin: 1.5em 0; border-top: 1px solid #eee;"></div>
-        <a href="https://ttl8ygt82u.feishu.cn/wiki/VZdjwDNxWi4j0jkdyxMcOg2VnFf?from=from_copylink" 
-           style="display: inline-flex; 
-                  align-items: center; 
-                  padding: 10px 20px; 
-                  background: #2d8cf0; 
-                  color: white; 
-                  border-radius: 6px; 
-                  text-decoration: none;
-                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                  transform: translateY(0);
-                  box-shadow: 0 4px 6px rgba(45,140,240,0.1);
-                  border: 1px solid rgba(45,140,240,0.2);"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(45,140,240,0.2)'"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(45,140,240,0.1)'"
-           onmousedown="this.style.transform='translateY(1px)'"
-           onmouseup="this.style.transform='translateY(-2px)'">
-            📖 详细使用教程（重要）
-        </a>
-    </div>
-    <div style="margin: 1.5em 0; padding: 1.5em; background: #fff9f2; border-left: 4px solid #ffc107; border-radius: 8px;">
-        <h2 style="color: #ff9f00; margin: 0 0 1em;">🌹 支持开发</h2>
-        <p style="margin: 0.5em 0;">如果这个插件对你有帮助，欢迎给作者点个赞或打赏一杯咖啡，这将鼓励作者更新制作更多有用的插件：</p>
-        <div style="margin: 1em 0; text-align: center;">
-            <img src="https://glaube-ty.oss-cn-chengdu.aliyuncs.com/img/ReQR.png"
-                 alt="TCQR"
-                 style="width: 600px; border-radius: 8px; margin-bottom: 1em;">
-        </div>
-        <div style="text-align: center;">
-            <a href="https://ttl8ygt82u.feishu.cn/wiki/VZdjwDNxWi4j0jkdyxMcOg2VnFf#share-AlWNdLXSPo4nonxhsUOcP7tYnnb" 
-                style="display: inline-flex; 
-                        align-items: center; 
-                        padding: 12px 24px; 
-                        background: linear-gradient(135deg, #ff9f00, #ffc107); 
-                        color: white; 
-                        border-radius: 6px; 
-                        text-decoration: none;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        transform: translateY(0);
-                        box-shadow: 0 4px 6px rgba(255,159,0,0.1);
-                        border: 1px solid rgba(255,159,0,0.2);"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(255,159,0,0.2)'"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(255,159,0,0.1)'"
-                onmousedown="this.style.transform='translateY(1px)'"
-                onmouseup="this.style.transform='translateY(-2px)'">
-                💖 特别鸣谢
-            </a>
-        </div>
-    </div>
-    <div style="margin: 1.5em 0; padding: 1.5em; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h2 style="color: #2d8cf0; margin: 0 0 1em;">📅 更新日志</h2>
-        <p style="margin: 0.5em 0;">此处将不再显示更新日志，请点击下方👇按钮查看完整的更新日志。</p>
-        <div style="text-align: center;">
-        <a href="https://ttl8ygt82u.feishu.cn/wiki/KbpBw3NoCiCeyqkRb0iceTRtnKh" 
-           style="display: inline-flex;
-                  align-items: center;
-                  padding: 12px 24px;
-                  background: linear-gradient(135deg, #2d8cf0 30%, #1e6bff 70%);
-                  color: white;
-                  border-radius: 6px;
-                  text-decoration: none;
-                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                  transform: translateY(0);
-                  box-shadow: 0 4px 8px rgba(45,140,240,0.15);
-                  border: 1px solid rgba(255,255,255,0.2);
-                  margin-top: 1.2em;
-                  gap: 8px;">
-            <span style="font-size: 1.1em; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));">📄</span>
-            <span style="font-weight: 500; letter-spacing: 0.5px;">完整更新日志</span>
-        </a>
-        </div>
-    </div>
-    <div style="margin: 1.5em 0; padding: 1.5em; background: #f0f9ff; border-left: 4px solid #2d8cf0; border-radius: 8px;">
-        <h2 style="color: #2d8cf0; margin: 0 0 1em;">💬 加入讨论</h2>
-        <p style="margin: 0.5em 0;">目前我在开发的插件有主页、读书笔记、空文档清理、彩色图标，所以统一用一个频道了，方便查看管理~</p>
-        <div style="margin: 1em 0; text-align: center;">
-            <img src="https://glaube-ty.oss-cn-chengdu.aliyuncs.com/img/TCQR.jpg"
-                 alt="TCQR"
-                 style="width: 200px; border-radius: 8px; margin-bottom: 1em;">
-        </div>
-        <div style="text-align: center;">
-            <a href="https://pd.qq.com/s/2ks4079x0"
-                style="display: inline-flex;
-                        align-items: center;
-                        padding: 12px 24px;
-                        background: linear-gradient(135deg, #2d8cf0 30%, #1e6bff 70%);
-                        color: white;
-                        border-radius: 6px;
-                        text-decoration: none;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        transform: translateY(0);
-                        box-shadow: 0 4px 8px rgba(45,140,240,0.15);
-                        border: 1px solid rgba(255,255,255,0.2);
-                        margin: 0 auto;
-                        gap: 8px;"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(45,140,240,0.2)'"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(45,140,240,0.1)'"
-                onmousedown="this.style.transform='translateY(1px)'"
-                onmouseup="this.style.transform='translateY(-2px)'">
-                <span style="font-size: 1.1em; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));">👥</span>
-                <span style="font-weight: 500; letter-spacing: 0.5px;">加入腾讯讨论频道</span>
-            </a>
-        </div>
-    </div>
-    <div style="margin: 1.5em 0; padding: 1.5em; background: #f8f5ff; border-left: 4px solid #8a3ffc; border-radius: 8px;">
-        <h2 style="color: #8a3ffc; margin: 0 0 1em;">🔮 参考项目</h2>
-        <p style="margin: 0.5em 0; color: black;">本插件部分功能参考了以下优秀项目：</p>
-        <ul style="margin: 0; padding-left: 1.2em;">
-            <li style="margin: 0.5em 0; padding: 12px; background: #f3f0ff; border-radius: 6px;">
-                <a href="https://github.com/zhaohongxuan/obsidian-weread-plugin" 
-                   style="color: #8a3ffc; 
-                          text-decoration: none;
-                          font-weight: 500;
-                          display: block;
-                          margin-bottom: 4px;"
-                   onmouseover="this.style.textDecoration='underline'"
-                   onmouseout="this.style.textDecoration='none'">
-                    obsidian-weread-plugin
-                </a>
-                <span style="color: #666; display: block; line-height: 1.5;">
-                    微信读书笔记同步功能参考了其微信官方 API 接口。
-                </span>
-            </li>
-            <li style="margin: 0.5em 0; padding: 12px; background: #f3f0ff; border-radius: 6px;">
-                <a href="https://getquicker.net/sharedaction?code=c9154e53-d422-43de-4832-08dc59347e50" 
-                   style="color: #8a3ffc; 
-                          text-decoration: none;
-                          font-weight: 500;
-                          display: block;
-                          margin-bottom: 4px;"
-                   onmouseover="this.style.textDecoration='underline'"
-                   onmouseout="this.style.textDecoration='none'">
-                    Quicker - 读书笔记
-                </a>
-                <span style="color: #666; display: block; line-height: 1.5;">
-                    本插件来源于我在 Quicker 中为 Obsidian 等开发的读书笔记动作。
-                </span>
-            </li>
-        </ul>
-    </div>
-    <div style="margin: 1.5em 0; padding: 1.5em; background: #fff5f5; border-left: 4px solid #ff4d4f; border-radius: 8px;">
-        <h2 style="color: #ff4d4f; margin: 0 0 1em;">⚠️ 免责声明</h2>
-        <ul style="margin: 0.5em 0; padding-left: 1.2em; color: #666;">
-            <li style="margin: 0.5em 0;">本插件数据来源于豆瓣公开数据，开发者不保证数据的准确性和完整性</li>
-            <li style="margin: 0.5em 0;">使用者应遵守豆瓣网的相关使用条款</li>
-            <li style="margin: 0.5em 0;">对于微信读书笔记同步需要基于 Cookie 远程获取个人信息，但都是在本地进行，如果介意慎用</li>
-            <li style="margin: 0.5em 0;">本插件数据仅用于个人书籍数据管理，禁止用于商业用途等违规行为</li>
-            <li style="margin: 0.5em 0;">开发者对使用本插件造成的任何损失不承担责任</li>
-        </ul>
-    </div>
-</div>
+# 📚 读书观影笔记（siyuan-douban）
+
+> 一个为[思源笔记](https://b3log.org/siyuan/)打造的**书籍 / 电影 / 电视剧**元数据抓取与笔记管理插件。
+> 支持豆瓣书籍查询、TMDB 影视查询、微信读书笔记同步，并自动把数据写入思源的**属性视图数据库**、按模板生成笔记文档。
+
+<p align="center">
+  <img src="preview.png" alt="预览" width="720">
+</p>
+
+---
+
+## 📖 关于本项目
+
+本项目 fork 自 [Glaube-TY/siyuan-douban](https://github.com/Glaube-TY/siyuan-douban) 的 **v2.8.1**，在此基础上做了三件事：
+
+| 改动 | 说明 |
+| --- | --- |
+| 🌐 **网页版适配** | 书籍搜索改为通过思源 `forwardProxy` 抓取[豆瓣搜索页](https://search.douban.com/book/subject_search)，解析页面内嵌的 `window.__DATA__` JSON；因此在**浏览器端（browser-desktop / browser-mobile）**也能正常搜索书籍，不再依赖 Electron 专有 API。 |
+| 🎬 **电影观影笔记** | 接入 **TMDB API**，新增「电影查询」标签页：搜索 → 选择 → 编辑 → 写入独立的**电影数据库** → 按模板生成观影笔记。 |
+| 📺 **电视剧追剧笔记** | 同样基于 TMDB，新增「电视剧查询」标签页，字段体系针对剧集做了扩展（季数 / 集数 / 单集片长 / 电视台 / 首播日期），写入独立的**电视剧数据库**并生成追剧笔记。 |
+
+> 本仓库分支：`web-movie-tv`（上游 `main` 保持与原作者同步，未做改动）。
+
+---
+
+## ✨ 功能总览
+
+### 🔍 书籍查询（豆瓣）
+- **两种查询方式**：输入 **ISBN** 直连详情页；输入 **书名** 走关键词搜索弹窗。
+- 抓取字段：书名、副标题、原作名、作者、译者、出版社、出版年、出品方、丛书、ISBN、豆瓣评分、评分人数、定价、页数、装帧、书籍简介、作者介绍。
+- 封面自动下载到 `assets/covers/`，下载失败可在表单里**手动上传封面**。
+- 自动**补齐数据库缺失列**、清理重复列，按 `ISBN` 去重。
+- 一键按模板生成读书笔记文档，并自动把文档挂到数据库行上。
+
+### 🎬 电影查询（TMDB）
+- 关键词搜索 TMDB 电影库 → 弹窗展示海报 / 评分 / 简介 → 点击选择自动拉取详情。
+- 抓取字段：电影名、原名、导演、编剧、主演、类型、制片国家/地区、语言、上映日期、片长、IMDb 编号、TMDB 链接、评分、评分人数、剧情简介。
+- 表单内可继续编辑任意字段，并设置**我的评分 / 电影分类 / 观影状态 / 开始日期 / 看完日期**。
+- 写入**独立的电影数据库**，按 `IMDb编号`（缺失时回退 TMDB 链接）去重。
+- 一键生成观影笔记。
+
+### 📺 电视剧查询（TMDB）
+- 与电影同款流程，字段针对剧集扩展：**首播日期、季数、集数、单集片长、电视台**。
+- 导演/编剧优先取 TMDB `created_by`（剧集创作者），并回退到演职员表。
+- 写入**独立的电视剧数据库**，按 `IMDb编号`（缺失时回退 TMDB 链接）去重。
+- 一键生成追剧笔记。
+
+### 📗 微信读书同步
+- 扫码登录或手动填 Cookie，支持**全量同步 / 增量更新同步**。
+- 支持自定义 ISBN、忽略书籍、按 `bookID` 同步三类例外管理。
+- 可配置是否随思源启动自动同步。
+- 笔记内容按**微信读书笔记模板**渲染后写入对应书籍文档。
+
+### ⚙️ 用户设置
+书籍 / 电影 / 电视剧三套数据库 ID、评分等级、分类、状态，以及三套笔记模板，统一在一个面板里维护。
+
+---
+
+## 🚀 安装
+
+### 方式一：插件市场（若已上架）
+思源笔记 → `设置` → `集市` → `插件` → 搜索「读书笔记」→ 安装启用。
+
+### 方式二：手动安装本仓库构建产物
+1. 下载本仓库 `package.zip`（或自行构建，见下方）。
+2. 解压到思源工作空间目录：`工作空间/data/plugins/siyuan-douban/`。
+   - 请确保该目录下直接就是 `plugin.json`、`index.js`、`index.css`、`i18n/`、`icon.png`。
+3. 思源 → `设置` → `集市` → `已下载` → 启用「读书笔记」。
+
+### 方式三：本地构建
+```bash
+git clone https://github.com/dengmotong/siyuan-douban.git
+cd siyuan-douban
+git checkout web-movie-tv
+
+npm install          # 或 pnpm install
+npm run build        # 产物在 dist/，同时生成 package.zip
+
+# 将 dist/ 同步到正在运行的思源（脚本内写死了 docker 路径，可按需修改）
+npm run sync
+```
+也可用 `npm run dev` 进入 watch 模式，配合 `npm run make-link` 把 `dev/` 软链到思源插件目录（需思源运行在 `localhost:6806`）。
+
+---
+
+## 🏁 快速上手
+
+### 0. 准备数据库（首次使用必做）
+插件不会自动建库，需要你先在思源里手动创建**属性视图数据库**：
+
+1. 新建一个文档，输入 `/数据库`（或 `/属性视图`）创建一个属性视图块。
+2. 在块上右键 → 复制 → **复制块 ID**，得到形如 `20260618173016-gm5h0sw` 的 ID。
+3. 打开插件（顶栏图标 📚，或快捷键 `⌘/Ctrl + Shift + ;`）→ `用户设置` → 粘贴到对应输入框。
+   - 书籍数据库块 ID → 书籍查询
+   - 电影数据库块 ID → 电影查询
+   - 电视剧数据库块 ID → 电视剧查询
+4. 点击 `保存设置`。插件会校验 ID 并自动补齐所有缺失字段列。
+
+> 💡 三个数据库可以放在同一个文档里，也可以是三个不同文档，互不影响。
+> 首次添加某条记录后，插件会把主键列改名为「书名」/「电影名」/「剧名」。
+
+### 1. 获取 TMDB API Key（电影 / 电视剧必做）
+1. 注册 / 登录 [TMDB](https://www.themoviedb.org/)。
+2. 打开 [账号设置 → API](https://www.themoviedb.org/settings/api)，申请一个 **Developer** API Key（免费）。
+3. 复制 **API Key (v3 auth)**，粘贴到插件 `用户设置` → `TMDB API` → `保存设置`。
+
+> 电影和电视剧**共用同一个 TMDB API Key**。
+
+### 2. 添加一本书
+1. `书籍查询` 标签页，输入 **ISBN**（如 `9787115428028`）→ 回车：直接抓取详情。
+2. 或输入**书名**（如 `深入理解计算机系统`）→ 回车：弹出搜索结果，点选目标书籍。
+3. 在表单里核对 / 修改字段，选择「我的评分 / 书籍分类 / 阅读状态」，勾选「生成读书笔记」。
+4. 点 `✅添加书籍`。
+
+### 3. 添加一部电影 / 一部电视剧
+1. 切到 `电影查询` / `电视剧查询`。
+2. 输入片名 → 🔍 → 弹窗挑一条结果。
+3. 核对字段，选择「我的评分 / 分类 / 观影（追剧）状态」，设置起止日期，勾选「生成观影（追剧）笔记」。
+4. 点 `✅添加电影` / `✅添加电视剧`。
+
+### 4. 同步微信读书笔记
+1. `微信读书` 标签页 → 扫码登录（桌面端）或手动填写 Cookie。
+2. 首次点 `全部同步`，之后可点 `更新同步` 做增量。
+3. 在弹窗里勾选要同步的书籍，确认即可。
+
+---
+
+## 🧩 数据库字段说明
+
+插件会**自动补齐**下列列，你也可以提前手动建好（名称必须完全一致）。完整说明见 [`docs/数据库字段说明.md`](docs/数据库字段说明.md)。
+
+| 数据库 | 主键列 | 自动补齐的列 |
+| --- | --- | --- |
+| 书籍 | `书名` | 封面、副标题、原作名、作者、译者、出版社、出版年、出品方、丛书、ISBN、豆瓣评分、评分人数、定价、页数、装帧、我的评分、书籍分类、阅读状态、开始日期、读完日期、书籍简介、作者介绍 |
+| 电影 | `电影名` | 原名、封面、导演、编剧、主演、类型、制片国家/地区、语言、上映日期、片长、IMDb编号、链接、评分、评分人数、我的评分、观影状态、电影分类、开始日期、看完日期、剧情简介 |
+| 电视剧 | `剧名` | 原名、封面、导演、编剧、主演、类型、制片国家/地区、语言、首播日期、季数、集数、单集片长、电视台、IMDb编号、链接、评分、评分人数、我的评分、追剧状态、电视剧分类、开始日期、看完日期、剧情简介 |
+
+**去重规则**：书籍按 `ISBN`；电影 / 电视剧按 `IMDb编号`，为空时回退到 TMDB 链接。
+
+---
+
+## 📝 笔记模板变量
+
+插件支持为书籍、电影、电视剧分别配置 Markdown 模板。变量形如 `{{书名}}`，添加记录时按当前数据渲染。
+
+常用示例（完整清单见 [`docs/模板变量参考.md`](docs/模板变量参考.md)）：
+
+```markdown
+# 🎬 {{电影名}}-{{原名}}
+
+![]({{封面}})
+
+| 属性 | 内容 |
+| --- | --- |
+| 导演 | {{导演}} |
+| 主演 | {{主演}} |
+| 上映日期 | {{上映日期}} |
+| IMDb | `{{IMDb编号}}` |
+
+⭐ **{{评分}}**（{{评分人数}} 人评价） · 我的评分：{{我的评分}} · 状态：{{观影状态}}
+```
+
+> `SY模板渲染` 开关：开启后先写入模板 Markdown，再交给思源的模板引擎二次渲染（可配合思源的 `.md` 模板语法），渲染文件保存在 `data/storage/petal/siyuan-douban/` 下。
+
+---
+
+## 📂 目录结构
+
+```
+src/
+├── index.ts                      # 插件入口（顶栏图标、快捷键、微信读书自动同步）
+├── api.ts                        # 思源 API 封装（sql / forwardProxy / setBlockAttrs）
+├── components/
+│   ├── index.svelte              # 主面板：标签页切换 + 各模块状态
+│   ├── tabs/                     # 书籍 / 电影 / 电视剧 / 设置 / 微信读书 / 关于
+│   ├── common/                   # 搜索弹窗、模板编辑器、封面等对话框
+│   └── styles/                   # SCSS
+├── libs/                         # 对话框封装、CustomSelect、设置框架
+└── utils/
+    ├── bookHandling/             # 写入书籍数据库 + 生成读书笔记
+    ├── movieHandling/            # 写入电影数据库 + 生成观影笔记
+    ├── tvHandling/               # 写入电视剧数据库 + 生成追剧笔记
+    ├── douban/book/              # 豆瓣书籍抓取（搜索 / 详情 / 页面）
+    ├── douban/movie/             # TMDB 电影抓取
+    ├── douban/tv/                # TMDB 电视剧抓取
+    ├── weread/                   # 微信读书登录与笔记同步
+    └── core/                     # 封面下载、格式化工具
+```
+
+---
+
+## 🛠️ 开发
+
+详见 [`docs/开发文档.md`](docs/开发文档.md)。
+
+```bash
+npm run dev            # watch 模式，输出到 dev/（CJS）
+npm run build          # 生产构建，输出到 dist/ + package.zip
+npm run make-link      # 把 dev/ 软链到思源插件目录
+npm run make-install   # 构建并复制到思源插件目录
+npm run update-version # 交互式版本号升级（plugin.json + package.json）
+```
+
+技术栈：**Vite 5 + Svelte 4 + TypeScript**，插件包为 **CJS**，`siyuan` 包始终 external。
+`@/` 别名指向 `src/`；i18n 位于 `public/i18n/`（YAML → JSON 由 `yaml-plugin.js` 处理）。
+
+---
+
+## ❓ 常见问题
+
+见 [`docs/常见问题.md`](docs/常见问题.md)。高频问题速查：
+
+| 现象 | 原因 / 解决 |
+| --- | --- |
+| `该块不是有效的属性视图数据库块` | 填的是普通文档块 ID，需填**属性视图块**的 ID |
+| `请先在设置中填写 TMDB API Key` | 未配置或保存失败，检查 `用户设置 → TMDB API` |
+| `TMDB API Key 无效` | Key 复制不完整，或用了 v4 的 Bearer Token |
+| 封面不显示 | 豆瓣 / TMDB 图片 CDN 网络不通，可在表单里手动上传封面 |
+| 网页版搜不到书 | 确认思源版本支持 `forwardProxy`，且网络能访问 `search.douban.com` |
+| 电影/电视剧重复添加 | 去重依赖 `IMDb编号`，若 TMDB 无 IMDb 数据则回退链接比对 |
+
+---
+
+## ⚠️ 免责声明
+
+- 书籍数据来自豆瓣公开页面，影视数据来自 [TMDB](https://www.themoviedb.org/)，开发者不保证数据的准确性和完整性。
+- 使用者应遵守豆瓣、TMDB 的相关使用条款；本插件仅用于个人数据管理，**禁止商用**。
+- 微信读书同步基于 Cookie 在**本地**完成，请自行评估风险。
+- 开发者对使用本插件造成的任何损失不承担责任。
+
+本项目电影 / 电视剧数据由 **TMDB API** 提供，This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+---
+
+## 🙏 致谢
+
+- 原插件作者 [Glaube-TY](https://github.com/Glaube-TY) 及其 [siyuan-douban](https://github.com/Glaube-TY/siyuan-douban)。
+- 微信读书接口思路参考 [obsidian-weread-plugin](https://github.com/zhaohongxuan/obsidian-weread-plugin)。
+
+## 📄 许可
+
+[MIT](LICENSE)

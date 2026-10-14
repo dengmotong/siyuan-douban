@@ -17,6 +17,11 @@
     export let tempMovieStatuses: string;
     export let movieDatabaseStatusMessage: string;
     export let tmdbApiKey: string;
+    export let tvDatabassID: string;
+    export let tempTvRatings: string;
+    export let tempTvCategories: string;
+    export let tempTvStatuses: string;
+    export let tvDatabaseStatusMessage: string;
 </script>
 
 <div class="settings">
@@ -82,6 +87,31 @@
     <div class="form-row template">
         <button class="b3-button" on:click={() => dispatch("openMovieTemplate")}>
             📝 {i18n.movieSetTemplate || "设置电影笔记模板"}
+        </button>
+    </div>
+
+    <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--b3-border-color);" />
+
+    <h3>📺 电视剧数据库</h3>
+    <div class="form-row">
+        <input type="text" bind:value={tvDatabassID} placeholder={i18n.tvDatabaseIDPlaceholder || "电视剧数据库块ID"} />
+        {tvDatabaseStatusMessage}
+    </div>
+
+    <h3>{i18n.tvPreferenceSettings || "电视剧偏好设置"}</h3>
+    <div class="form-row custom-options">
+        <label>{i18n.tvRatingsLabel || "电视剧评分等级（逗号分隔）："} <input bind:value={tempTvRatings} /></label>
+    </div>
+    <div class="form-row custom-options">
+        <label>{i18n.tvCategoriesLabel || "电视剧分类（逗号分隔）："} <input bind:value={tempTvCategories} /></label>
+    </div>
+    <div class="form-row custom-options">
+        <label>{i18n.tvStatusesLabel || "追剧状态（逗号分隔）："} <input bind:value={tempTvStatuses} /></label>
+    </div>
+
+    <div class="form-row template">
+        <button class="b3-button" on:click={() => dispatch("openTvTemplate")}>
+            📝 {i18n.tvSetTemplate || "设置电视剧笔记模板"}
         </button>
     </div>
 

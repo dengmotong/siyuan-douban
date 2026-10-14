@@ -29,7 +29,7 @@
             const keyword = decodeURIComponent(searchKeyword);
             searchResults = await searchDoubanBooks(keyword);
             if (searchResults.length === 0) {
-                errorMessage = plugin.i18n?.searchNoResults || "未找到相关书籍";
+                errorMessage = plugin.i18n?.searchNoResultsBook || "未找到相关书籍";
             }
         } catch (error) {
             if (retryOnFailure) {
@@ -39,7 +39,7 @@
                     const keyword = decodeURIComponent(searchKeyword);
                     searchResults = await searchDoubanBooks(keyword);
                     if (searchResults.length === 0) {
-                        errorMessage = plugin.i18n?.searchNoResults || "未找到相关书籍";
+                        errorMessage = plugin.i18n?.searchNoResultsBook || "未找到相关书籍";
                     }
                 } catch (retryError) {
                     errorMessage = `${retryError.message}`;

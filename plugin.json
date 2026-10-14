@@ -26,8 +26,8 @@
     "zh_CN": "读书笔记"
   },
   "description": {
-    "en_US": "Obtain Douban book information and add it to the database & synchronize weread notes.",
-    "zh_CN": "豆瓣书籍信息获取并添加到数据库 & 同步微信读书笔记。"
+    "en_US": "Obtain Douban book information and add it to the database & synchronize weread notes. Also fetches TMDB movie / TV series info into separate movie and TV databases with auto-generated review notes.",
+    "zh_CN": "豆瓣书籍信息获取并添加到数据库 & 同步微信读书笔记。支持通过 TMDB 获取电影、电视剧信息并分别写入观影 / 追剧数据库，自动生成观后感笔记。"
   },
   "readme": {
     "en_US": "README.md",
@@ -50,6 +50,14 @@
     "booknote",
     "weread",
     "微信读书",
-    "微信"
+    "微信",
+    "电影",
+    "movie",
+    "tmdb",
+    "观影笔记",
+    "电视剧",
+    "tv",
+    "追剧",
+    "影视笔记"
   ]
 }
