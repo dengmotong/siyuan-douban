@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
 
+# Fork 仓库的 GITHUB_TOKEN 默认是只读，必须显式申请 contents: write
+# 否则 ncipollo/release-action 会以 403 失败。
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
