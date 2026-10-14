@@ -57,6 +57,12 @@ The three modules are near-independent copies; when changing one, check whether 
 - **TV-specific fields**: 首播日期, 季数, 集数, 单集片长, 电视台. Director prefers TMDB `created_by` (creators), falling back to `crew[job=Director]`.
 - **Template placeholders**: `{{剧名}}`, `{{首播日期}}`, `{{季数}}`, `{{电视台}}`, …
 - **Form**: `src/components/tabs/TvSearchTab.svelte`
+- **Optional per-episode notes**: checkbox `tvInfo.addEpisodeNotes` → `generateEpisodeNotes()` in `tvHandling/index.ts`.
+  `fetchTMDBTvSeasons()` (`douban/tv/fetchEpisodes.ts`) pulls every season (concurrency 4) and **skips season 0 (specials)**.
+  One doc per episode at `{db hpath}/{剧名}/{第N季}/{第NN集 集标题}`; season folders are auto-created by SiYuan.
+  Episode docs are NOT bound to the database row. Episode template is `tvEpisodeNoteTemplate` (`DEFAULT_TV_EPISODE_TEMPLATE` is the fallback).
+  Episode-only vars: `{{当前季}} {{当前集}} {{季集}} {{集标题}} {{集简介}} {{集播出日期}} {{集时长}} {{集剧照}} {{集评分}} {{集评分人数}}`, layered on top of all TV-level vars (`renderTvTemplate()` then episode vars).
+  `{{季数}}`/`{{集数}}` stay the series totals — do not overload them for episode numbers.
 
 ### 微信读书同步 (WeRead)
 - `src/utils/weread/`: QR login, cookie auth, note sync engine

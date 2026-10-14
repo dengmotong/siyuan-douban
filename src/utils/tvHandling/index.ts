@@ -1,8 +1,40 @@
-import { fetchSyncPost } from "siyuan";
+import { fetchSyncPost, showMessage } from "siyuan";
 import { sql, setBlockAttrs } from "@/api";
 import { changeTvMainKeyName } from './changeMainKeyName';
 import { generateUniqueBlocked, parseDateToTimestamp } from '../core/formatOp';
 import { getImage, downloadCover } from "@/utils/core/getImg";
+import { fetchTMDBTvSeasons, type TvEpisode } from "@/utils/douban/tv";
+
+/** 分集笔记默认模板（用户未设置时使用） */
+export const DEFAULT_TV_EPISODE_TEMPLATE = `# 📺 {{剧名}} 第{{当前季}}季 第{{当前集}}集 {{集标题}}
+
+![]({{集剧照}})
+
+- 播出日期：{{集播出日期}}
+- 时长：{{集时长}}
+- 评分：{{集评分}}（{{集评分人数}} 人评价）
+
+---
+
+## 剧情简介
+{{集简介}}
+
+---
+
+## 本集笔记
+### ✍️ 观剧心得
+（在此记录你对本集的感受）
+
+### 🔖 精彩台词
+> 在此记录本集台词
+
+### 🖼️ 截图
+| # | 截图 | 说明 |
+|---|------|------|
+| 1 | _在此粘贴剧集截图_ | _写下对截图画面的说明或感受_ |
+| 2 | | |
+| … | | |`;
+
 
 export async function loadAVTvData(avID: string, fullData: any, plugin: any) {
     try {
@@ -160,32 +192,7 @@ export async function loadAVTvData(avID: string, fullData: any, plugin: any) {
             const setting = await plugin.loadData("settings.json");
             const isSYTemplateRender = setting.isSYTemplateRender;
 
-            const renderTemplate = (tmpl: string) =>
-                tmpl
-                    .replace(/{{剧名}}/g, fullData.title || '无标题')
-                    .replace(/{{原名}}/g, fullData.originalTitle || '')
-                    .replace(/{{导演}}/g, Array.isArray(fullData.director) ? fullData.director.join('、') : fullData.director || '')
-                    .replace(/{{编剧}}/g, Array.isArray(fullData.screenwriter) ? fullData.screenwriter.join('、') : fullData.screenwriter || '')
-                    .replace(/{{主演}}/g, Array.isArray(fullData.cast) ? fullData.cast.join('、') : fullData.cast || '')
-                    .replace(/{{类型}}/g, Array.isArray(fullData.genre) ? fullData.genre.join('、') : fullData.genre || '')
-                    .replace(/{{制片国家\/地区}}/g, Array.isArray(fullData.country) ? fullData.country.join('、') : fullData.country || '')
-                    .replace(/{{语言}}/g, Array.isArray(fullData.language) ? fullData.language.join('、') : fullData.language || '')
-                    .replace(/{{首播日期}}/g, fullData.firstAirDate || '')
-                    .replace(/{{季数}}/g, fullData.seasons || '')
-                    .replace(/{{集数}}/g, fullData.episodes || '')
-                    .replace(/{{单集片长}}/g, fullData.episodeRuntime || '')
-                    .replace(/{{电视台}}/g, Array.isArray(fullData.networks) ? fullData.networks.join('、') : fullData.networks || '')
-                    .replace(/{{IMDb编号}}/g, fullData.imdbId || '')
-                    .replace(/{{链接}}/g, fullData.tmdbUrl || fullData.doubanUrl || '')
-                    .replace(/{{评分}}/g, fullData.rating ? `${fullData.rating}` : '无评分')
-                    .replace(/{{评分人数}}/g, fullData.ratingCount ? `${fullData.ratingCount}` : '0')
-                    .replace(/{{我的评分}}/g, fullData.myRating || '未评分')
-                    .replace(/{{追剧状态}}/g, fullData.watchingStatus || '未看')
-                    .replace(/{{电视剧分类}}/g, fullData.tvCategory || '默认分类')
-                    .replace(/{{开始日期}}/g, fullData.startDate || '未开始')
-                    .replace(/{{看完日期}}/g, fullData.finishDate || '未完成')
-                    .replace(/{{封面}}/g, fullData.cover || '')
-                    .replace(/{{剧情简介}}/g, fullData.description || '');
+            const renderTemplate = (tmpl: string) => renderTvTemplate(tmpl, fullData);
 
             if (!isSYTemplateRender) {
                 const response = await fetchSyncPost('/api/filetree/createDocWithMd', {
@@ -249,10 +256,172 @@ export async function loadAVTvData(avID: string, fullData: any, plugin: any) {
             }
         }
 
-        return { code: 0, msg: "电视剧添加成功" };
+        // 生成分集笔记（可选）
+        let episodeCount = 0;
+        if (fullData.addEpisodeNotes) {
+            episodeCount = await generateEpisodeNotes(fullData, plugin);
+        }
+
+        return {
+            code: 0,
+            msg: episodeCount > 0 ? `电视剧添加成功，已生成 ${episodeCount} 集分集笔记` : "电视剧添加成功"
+        };
     } catch (error) {
         return { code: 1, msg: error.message || "未知错误", stack: error.stack };
     }
+}
+
+/**
+ * 为每集生成一个独立笔记文档。
+ * 目录结构：{数据库所在文档}/{剧名}/{第N季|特别篇}/{第NN集 集标题}
+ */
+async function generateEpisodeNotes(fullData: any, plugin: any): Promise<number> {
+    try {
+        const setting = await plugin.loadData("settings.json");
+        const apiKey = setting?.tmdbApiKey;
+        if (!apiKey) {
+            showMessage("⚠️ 未配置 TMDB API Key，已跳过分集笔记生成", 5000);
+            return 0;
+        }
+
+        const tmdbId = fullData.tmdbId || extractTmdbId(fullData.tmdbUrl);
+        if (!tmdbId) {
+            showMessage("⚠️ 无法识别 TMDB ID，已跳过分集笔记生成", 5000);
+            return 0;
+        }
+
+        const allSeasons = await fetchTMDBTvSeasons(tmdbId, apiKey, plugin);
+        // TMDB 第 0 季是「特别篇」，不属于正片剧集，默认不生成笔记
+        const seasons = allSeasons.filter((s) => s.seasonNumber > 0);
+        const totalEpisodes = seasons.reduce((sum, s) => sum + s.episodes.length, 0);
+        if (totalEpisodes === 0) {
+            showMessage("⚠️ 未获取到分集信息，已跳过分集笔记生成", 5000);
+            return 0;
+        }
+
+        const sqlresult = await sql(`SELECT * FROM blocks WHERE id = "${fullData.databaseBlockId}"`);
+        if (!sqlresult?.length) {
+            showMessage("❌ 未找到数据库所在文档，已跳过分集笔记生成", 5000);
+            return 0;
+        }
+
+        const rootPath = `${sqlresult[0].hpath}/${sanitizePathSegment(fullData.title || "未命名剧集")}`;
+        const isSYTemplateRender = setting.isSYTemplateRender;
+        const template = fullData.episodeNoteTemplate || DEFAULT_TV_EPISODE_TEMPLATE;
+
+        showMessage(`⏳ 正在生成分集笔记（共 ${totalEpisodes} 集）...`, 3000);
+
+        let done = 0;
+        for (const season of seasons) {
+            const seasonFolder = season.seasonNumber === 0 ? "特别篇" : `第${season.seasonNumber}季`;
+            for (const episode of season.episodes) {
+                const docPath = `${rootPath}/${seasonFolder}/${sanitizePathSegment(buildEpisodeTitle(episode))}`;
+                try {
+                    const markdown = renderEpisodeTemplate(template, fullData, episode);
+                    const response = await fetchSyncPost('/api/filetree/createDocWithMd', {
+                        parentID: sqlresult[0].root_id,
+                        notebook: sqlresult[0].box,
+                        path: docPath,
+                        markdown: isSYTemplateRender ? "" : markdown,
+                    });
+
+                    if (response.code !== 0) {
+                        console.warn(`创建分集笔记失败（${docPath}）:`, response.msg);
+                        continue;
+                    }
+
+                    if (isSYTemplateRender && response.data) {
+                        await plugin.saveData("tvEpisodeNoteTemplate.md", markdown);
+                        const res = await plugin.client.getConf();
+                        const dataDir = res.data.conf.system.dataDir;
+                        const respo = await plugin.client.render({
+                            id: response.data,
+                            path: dataDir + "/storage/petal/siyuan-douban/tvEpisodeNoteTemplate.md",
+                        });
+                        await plugin.client.updateBlock({
+                            id: response.data,
+                            data: respo.data.content,
+                            dataType: "dom",
+                        });
+                    }
+
+                    done++;
+                    if (done % 5 === 0) showMessage(`⏳ 分集笔记 ${done}/${totalEpisodes}`, 2000);
+                } catch (error) {
+                    console.warn(`创建分集笔记异常（${docPath}）:`, error);
+                }
+            }
+        }
+
+        showMessage(`✅ 已生成 ${done}/${totalEpisodes} 集分集笔记`, 3000);
+        return done;
+    } catch (error) {
+        console.error("生成分集笔记失败:", error);
+        showMessage(`❌ 分集笔记生成失败: ${error.message}`, 5000);
+        return 0;
+    }
+}
+
+/** 渲染追剧（总）笔记模板 */
+function renderTvTemplate(tmpl: string, fullData: any): string {
+    return tmpl
+        .replace(/{{剧名}}/g, fullData.title || '无标题')
+        .replace(/{{原名}}/g, fullData.originalTitle || '')
+        .replace(/{{导演}}/g, Array.isArray(fullData.director) ? fullData.director.join('、') : fullData.director || '')
+        .replace(/{{编剧}}/g, Array.isArray(fullData.screenwriter) ? fullData.screenwriter.join('、') : fullData.screenwriter || '')
+        .replace(/{{主演}}/g, Array.isArray(fullData.cast) ? fullData.cast.join('、') : fullData.cast || '')
+        .replace(/{{类型}}/g, Array.isArray(fullData.genre) ? fullData.genre.join('、') : fullData.genre || '')
+        .replace(/{{制片国家\/地区}}/g, Array.isArray(fullData.country) ? fullData.country.join('、') : fullData.country || '')
+        .replace(/{{语言}}/g, Array.isArray(fullData.language) ? fullData.language.join('、') : fullData.language || '')
+        .replace(/{{首播日期}}/g, fullData.firstAirDate || '')
+        .replace(/{{季数}}/g, fullData.seasons || '')
+        .replace(/{{集数}}/g, fullData.episodes || '')
+        .replace(/{{单集片长}}/g, fullData.episodeRuntime || '')
+        .replace(/{{电视台}}/g, Array.isArray(fullData.networks) ? fullData.networks.join('、') : fullData.networks || '')
+        .replace(/{{IMDb编号}}/g, fullData.imdbId || '')
+        .replace(/{{链接}}/g, fullData.tmdbUrl || fullData.doubanUrl || '')
+        .replace(/{{评分}}/g, fullData.rating ? `${fullData.rating}` : '无评分')
+        .replace(/{{评分人数}}/g, fullData.ratingCount ? `${fullData.ratingCount}` : '0')
+        .replace(/{{我的评分}}/g, fullData.myRating || '未评分')
+        .replace(/{{追剧状态}}/g, fullData.watchingStatus || '未看')
+        .replace(/{{电视剧分类}}/g, fullData.tvCategory || '默认分类')
+        .replace(/{{开始日期}}/g, fullData.startDate || '未开始')
+        .replace(/{{看完日期}}/g, fullData.finishDate || '未完成')
+        .replace(/{{封面}}/g, fullData.cover || '')
+        .replace(/{{剧情简介}}/g, fullData.description || '');
+}
+
+/** 分集模板 = 追剧总模板变量 + 分集变量 */
+function renderEpisodeTemplate(tmpl: string, fullData: any, episode: TvEpisode): string {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return renderTvTemplate(tmpl, fullData)
+        .replace(/{{当前季}}/g, String(episode.seasonNumber))
+        .replace(/{{当前集}}/g, String(episode.episodeNumber))
+        .replace(/{{季集}}/g, `S${pad(episode.seasonNumber)}E${pad(episode.episodeNumber)}`)
+        .replace(/{{集标题}}/g, episode.name || '')
+        .replace(/{{集简介}}/g, episode.overview || '')
+        .replace(/{{集播出日期}}/g, episode.airDate || '')
+        .replace(/{{集时长}}/g, episode.runtime || '')
+        .replace(/{{集剧照}}/g, episode.still || '')
+        .replace(/{{集评分}}/g, episode.rating || '无评分')
+        .replace(/{{集评分人数}}/g, episode.ratingCount || '0');
+}
+
+function buildEpisodeTitle(episode: TvEpisode): string {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const name = episode.name ? ` ${episode.name}` : "";
+    return `第${pad(episode.episodeNumber)}集${name}`;
+}
+
+function extractTmdbId(url?: string): number | null {
+    if (!url) return null;
+    const match = url.match(/themoviedb\.org\/tv\/(\d+)/);
+    return match ? Number(match[1]) : null;
+}
+
+/** 去掉不能出现在思源文档路径中的字符 */
+function sanitizePathSegment(name: string): string {
+    return name.replace(/[\\/:*?"<>|]/g, "_").trim() || "未命名";
 }
 
 function getTvAttributeType(attributeName: string): string {

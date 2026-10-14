@@ -113,6 +113,9 @@
         <button class="b3-button" on:click={() => dispatch("openTvTemplate")}>
             📝 {i18n.tvSetTemplate || "设置电视剧笔记模板"}
         </button>
+        <button class="b3-button" on:click={() => dispatch("openTvEpisodeTemplate")}>
+            📺 {i18n.tvSetEpisodeTemplate || "设置分集笔记模板"}
+        </button>
     </div>
 
     <div class="saveButton">

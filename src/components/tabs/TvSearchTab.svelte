@@ -354,6 +354,20 @@
                             {i18n.tvAddNotes || "生成追剧笔记"}
                         </label>
                     </label>
+                    <label class="mf-label">
+                        <span class="mf-text"></span>
+                        <label
+                            class="mf-checkbox"
+                            title={i18n.tvAddEpisodeNotesTip ||
+                                "为每一集生成一个独立笔记文档（放在总笔记之下）"}
+                        >
+                            <input
+                                type="checkbox"
+                                bind:checked={tvInfo.addEpisodeNotes}
+                            />
+                            {i18n.tvAddEpisodeNotes || "生成分集笔记"}
+                        </label>
+                    </label>
                 </div>
             </div>
 

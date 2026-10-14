@@ -2,6 +2,7 @@ const TMDB_API_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
 export interface TvInfo {
+    tmdbId?: number;
     title: string;
     originalTitle?: string;
     director: string[];
@@ -114,6 +115,7 @@ function parseTMDBTv(data: TMDBTvDetail): TvInfo {
     const imdbId = data.external_ids?.imdb_id || data.imdb_id || undefined;
 
     return {
+        tmdbId: data.id,
         title: data.name?.trim() || "未知剧名",
         originalTitle: data.original_name?.trim() || undefined,
         director: directors.length > 0 ? directors : (creators.length > 0 ? creators : [""]),

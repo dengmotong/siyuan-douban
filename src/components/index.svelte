@@ -6,7 +6,7 @@
     import "./styles/main.scss";
     import { loadAVData } from "../utils/bookHandling";
     import { loadAVMovieData } from "../utils/movieHandling";
-    import { loadAVTvData } from "../utils/tvHandling";
+    import { loadAVTvData, DEFAULT_TV_EPISODE_TEMPLATE } from "../utils/tvHandling";
     import SearchBookDialog from "./common/searchBookDialog.svelte";
     import SearchMovieDialog from "./common/searchMovieDialog.svelte";
     import SearchTvDialog from "./common/searchTvDialog.svelte";
@@ -238,6 +238,9 @@
     let tvDatabaseStatusMessage = "";
     let showTvTemplateEditor = false;
     let originalTvTemplate = "";
+    let tvEpisodeNoteTemplate = DEFAULT_TV_EPISODE_TEMPLATE;
+    let showTvEpisodeTemplateEditor = false;
+    let originalTvEpisodeTemplate = "";
 
     const tabs = [
         "🔍 " + i18n.topTabname1,
@@ -374,7 +377,9 @@
             startDate: tvInfo.startDate || "",
             finishDate: tvInfo.finishDate || "",
             addNotes: tvInfo.addNotes,
+            addEpisodeNotes: tvInfo.addEpisodeNotes,
             noteTemplate: tvNoteTemplate,
+            episodeNoteTemplate: tvEpisodeNoteTemplate,
         };
 
         try {
@@ -462,6 +467,7 @@
                 tmdbApiKey: tmdbApiKey,
                 tvDatabaseID: tvDatabassID,
                 tvNoteTemplate: tvNoteTemplate,
+                tvEpisodeNoteTemplate: tvEpisodeNoteTemplate,
                 tvRatings: tvRatings,
                 tvCategories: tvCategories,
                 tvStatuses: tvStatuses,
@@ -579,6 +585,7 @@
                 tmdbApiKey = savedSettings.tmdbApiKey || "";
                 tvDatabassID = savedSettings.tvDatabaseID || "";
                 tvNoteTemplate = savedSettings.tvNoteTemplate || "";
+                tvEpisodeNoteTemplate = savedSettings.tvEpisodeNoteTemplate || DEFAULT_TV_EPISODE_TEMPLATE;
 
                 tempRatings = customRatings.join(", ");
                 tempCategories = customCategories.join(", ");
@@ -736,6 +743,10 @@
                     originalTvTemplate = tvNoteTemplate;
                     showTvTemplateEditor = true;
                 }}
+                on:openTvEpisodeTemplate={() => {
+                    originalTvEpisodeTemplate = tvEpisodeNoteTemplate;
+                    showTvEpisodeTemplateEditor = true;
+                }}
             />
             <!-- 第五个标签页 - 微信读书设置-->
         {:else if activeTab === tabs[4]}
@@ -801,6 +812,7 @@
             tvStatusMessage = "成功获取电视剧信息";
             const selectedTv = detail;
             selectedTv.addNotes = true;
+            selectedTv.addEpisodeNotes = false;
             selectedTv.doubanUrl = selectedTv.tmdbUrl || selectedTv.doubanUrl;
             tvInfo = selectedTv;
             tvInputVales = selectedTv.title;
@@ -875,6 +887,29 @@
             originalTvTemplate = tvNoteTemplate;
             showTvTemplateEditor = false;
             showMessage("✅ 电视剧笔记模板保存成功", 3000);
+        } catch (error) {
+            showMessage(`❌ 模板保存失败: ${error.message}`, 5000);
+        }
+    }}
+/>
+
+<TemplateEditorDialog
+    bind:showTemplateEditor={showTvEpisodeTemplateEditor}
+    bind:noteTemplate={tvEpisodeNoteTemplate}
+    bind:plugin
+    on:close={() => {
+        tvEpisodeNoteTemplate = originalTvEpisodeTemplate;
+        showTvEpisodeTemplateEditor = false;
+    }}
+    on:save={async () => {
+        try {
+            const currentSettings =
+                (await plugin.loadData("settings.json")) || {};
+            currentSettings.tvEpisodeNoteTemplate = tvEpisodeNoteTemplate;
+            await plugin.saveData("settings.json", currentSettings);
+            originalTvEpisodeTemplate = tvEpisodeNoteTemplate;
+            showTvEpisodeTemplateEditor = false;
+            showMessage("✅ 电视剧分集笔记模板保存成功", 3000);
         } catch (error) {
             showMessage(`❌ 模板保存失败: ${error.message}`, 5000);
         }
