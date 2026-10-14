@@ -2,8 +2,9 @@
 
 SiYuan note plugin for fetching Douban book / TMDB movie & TV series info and syncing WeRead notes.
 
-Fork of [Glaube-TY/siyuan-douban](https://github.com/Glaube-TY/siyuan-douban) v2.8.1. Active work happens on the
-`web-movie-tv` branch; `main` mirrors upstream and is not modified. See `docs/开发文档.md` §10 for the sync workflow.
+Fork of [Glaube-TY/siyuan-douban](https://github.com/Glaube-TY/siyuan-douban) v2.8.1 (this fork ships as plugin version 2.9.0).
+Active work happens on the `web-movie-tv` branch; `main` mirrors upstream and is not modified.
+See `docs/开发文档.md` §10 for the upstream-sync workflow and §11 for release gotchas.
 
 ## Build & dev
 
@@ -18,6 +19,11 @@ npm run update-version  # interactive version bump for plugin.json + package.jso
 
 CI (`v*` tags) uses `pnpm install && pnpm build` and uploads `package.zip` as a release artifact.
 There is no typecheck script, but `npx tsc --noEmit -p tsconfig.json` passes.
+
+Release gotchas specific to this fork (details in `docs/开发文档.md` §11):
+- Tag as **`vX.Y.Z-fork`** — upstream already owns `v2.9.0`…`v4.x`, and this branch descends from v2.8.1, so reusing `v2.9.0` would be wrong and would require force-pushing over an upstream tag.
+- A fresh fork's workflows are **unregistered**; `gh api /actions/workflows` returns `total_count: 0` and tag pushes do nothing until `PUT /actions/permissions` is called once. Re-push the tag afterwards.
+- `release.yml` declares `permissions: contents: write` because fork `GITHUB_TOKEN`s default to read-only.
 
 ## Architecture
 
